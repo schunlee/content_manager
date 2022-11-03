@@ -31,6 +31,9 @@ class Article(models.Model):
     class Meta:
         ordering = ('create_time',)
 
+    def __str__(self):
+        return self.title
+
 
 class BusinessGroup(models.Model):
     '''
@@ -38,6 +41,9 @@ class BusinessGroup(models.Model):
     通过django admin配置
     '''
     name = CharField(max_length=50, blank=False, null=False, verbose_name="分组名")
+
+    def __str__(self):
+        return self.name
 
 
 class Customer(models.Model):
@@ -55,6 +61,9 @@ class Customer(models.Model):
     modified_time = TimeField(auto_now=True, verbose_name="商户信息修改时间")
     group = ForeignKey(BusinessGroup, on_delete=models.CASCADE, verbose_name="分组", related_name='customers')  # 分组
 
+    def __str__(self):
+        return self.name
+
 
 class ClerkType(models.Model):
     '''
@@ -68,6 +77,9 @@ class ClerkType(models.Model):
     class Meta:
         ordering = ('name',)
 
+    def __str__(self):
+        return self.name
+
 
 class Clerk(models.Model):
     '''
@@ -76,6 +88,11 @@ class Clerk(models.Model):
     clerk_number = CharField(max_length=50, blank=False, null=False, verbose_name="客服号码")
     note = TextField(blank=False, null=False, verbose_name="备注")
     clerk_type = ForeignKey(ClerkType, on_delete=models.CASCADE, verbose_name="类型", related_name="clerks")
+    # 一个客户/商户可以一次上多个甚至几十个客服号
+    customer = ForeignKey(Customer, on_delete=models.CASCADE, verbose_name="所属商户", related_name="clerks")
+
+    def __str__(self):
+        return self.clerk_number
 
 
 class Country(models.Model):
@@ -84,6 +101,15 @@ class Country(models.Model):
     通过django admin配置
     '''
     name = CharField(max_length=100, null=False, blank=False, verbose_name="国家名称")
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ('name',)
+        verbose_name_plural = "countries"
+
+
 
 
 class App(models.Model):
@@ -104,5 +130,5 @@ class App(models.Model):
     name = CharField(max_length=50, verbose_name="应用名称")
     behavior = CharField(max_length=10, choices=BEHAVIOR_IN_APP_CHOICES, default="outer", verbose_name="跳页方式")
     note = TextField(null=True, blank=True, verbose_name="备注")
-    target_country = ForeignKey(Country, on_delete=True, verbose_name="主推国家")
+    target_country = ForeignKey(Country, on_delete=models.CASCADE, verbose_name="主推国家")
     status = CharField(max_length=50, choices=STATUS_IN_APP_CHOICES, verbose_name="状态")
